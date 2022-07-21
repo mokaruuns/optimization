@@ -1,5 +1,7 @@
+from typing import Tuple, Any
+
 from optimizer import Optimizer
-from function import Function
+from functions import Function
 from math import ceil, log10
 
 SQRT5 = 5 ** (1 / 2)
@@ -17,7 +19,7 @@ class FibonacciOptimizer(Optimizer):
         super().__init__(epsilon, left_border, right_border)
         self.__get_initial_fn()
 
-    def optimize(self, func: Function) -> float:
+    def optimize(self, func: Function) -> tuple[float | Any, int]:
         func.reset_applying()
         a = self.left_border
         b = self.right_border
@@ -37,8 +39,10 @@ class FibonacciOptimizer(Optimizer):
                 x2 = x1
                 x1 = a + b - x2
                 fx1, fx2 = func.apply(x1), fx1
-        print(func.get_amount_applying())
-        return (x1 + x2) / 2
+            # print(x1, x2)
+            if (x1 - x2) / 2 > self.epsilon:
+                break
+        return (x1 + x2) / 2, func.get_amount_applying()
 
     def __get_initial_fn(self) -> None:
         delta = self.right_border - self.left_border
