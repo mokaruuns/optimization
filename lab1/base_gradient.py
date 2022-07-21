@@ -15,6 +15,8 @@ def get_new_alpha(func: BiFunction, start_point: np.ndarray, grad: np.ndarray) -
     optimizer = FibonacciOptimizer(1e-8, 0, 1)
     return optimizer.optimize(x)[0]
 
+def mod(vector: np.ndarray):
+    return np.sqrt(vector.dot(vector))
 
 class BaseGradient:
     def __init__(self, epsilon=1e-4, start=None, lr=0.5):
@@ -31,7 +33,7 @@ class BaseGradient:
         while not stop:
             print(start_point)
             grad = func.count_gradient(start_point)
-            ln = np.sqrt(grad.dot(grad))
+            ln = mod(grad)
             grad = grad / ln
             lr *= 0.5
             if stp:
