@@ -1,5 +1,3 @@
-from typing import Tuple, Any
-
 from optimizer import Optimizer
 from functions import Function
 from math import ceil, log10
@@ -19,7 +17,7 @@ class FibonacciOptimizer(Optimizer):
         super().__init__(epsilon, left_border, right_border)
         self.__get_initial_fn()
 
-    def optimize(self, func: Function) -> tuple[float | Any, int]:
+    def optimize(self, func: Function) -> tuple[float, int]:
         func.reset_applying()
         a = self.left_border
         b = self.right_border
@@ -39,7 +37,6 @@ class FibonacciOptimizer(Optimizer):
                 x2 = x1
                 x1 = a + b - x2
                 fx1, fx2 = func.apply(x1), fx1
-            # print(x1, x2)
             if (x1 - x2) / 2 > self.epsilon:
                 break
         return (x1 + x2) / 2, func.get_amount_applying()

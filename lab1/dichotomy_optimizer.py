@@ -12,9 +12,9 @@ class DichotomyOptimizer(Optimizer):
         func.reset_applying()
         left = self.left_border
         right = self.right_border
-        while (right - left) / 2 > self.epsilon:
-            x1 = (left + right - self.epsilon) / 2
-            x2 = (left + right + self.epsilon) / 2
+        while right - left > self.epsilon:
+            x1 = (left + right - self.epsilon / 2) / 2
+            x2 = (left + right + self.epsilon / 2) / 2
             fx1 = func.apply(x1)
             fx2 = func.apply(x2)
             if fx1 > fx2:

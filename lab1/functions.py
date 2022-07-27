@@ -52,3 +52,10 @@ class BiFunction(BaseFunction):
         ans += np.sum(vector * self.b)
         ans += self.c
         return ans
+
+    def reset_applying(self) -> None:
+        self.amount_applying = 0
+        self.amount_applying_grad = 0
+
+    def __repr__(self):
+        return str(np.concatenate((self.a, self.b), axis=None))

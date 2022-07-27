@@ -1,5 +1,3 @@
-from typing import Tuple, Any
-
 from optimizer import Optimizer
 from functions import Function
 
@@ -8,7 +6,7 @@ class GoldenRatioOptimizer(Optimizer):
     def __init__(self, epsilon: float, left_border: float, right_border: float) -> None:
         super().__init__(epsilon, left_border, right_border)
 
-    def optimize(self, func: Function) -> tuple[float | Any, int]:
+    def optimize(self, func: Function) -> tuple[float, int]:
         func.reset_applying()
         tau = (5 ** 0.5 - 1) / 2
         left = self.left_border
