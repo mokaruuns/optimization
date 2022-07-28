@@ -43,6 +43,7 @@ class BaseGradient:
         while not stop:
             grad = func.count_gradient(start_point)
             ln = mod(grad)
+            # print(grad, ln)
             grad = grad / ln
             if stp:
                 lr = get_new_alpha(func, start_point, grad, lr, my_optimizer)

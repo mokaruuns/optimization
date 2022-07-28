@@ -59,3 +59,30 @@ class BiFunction(BaseFunction):
 
     def __repr__(self):
         return str(np.concatenate((self.a, self.b), axis=None))
+
+
+class DiagFunction(BaseFunction):
+    def __init__(self, a, dim):
+        super().__init__()
+        self.amount_applying_grad = 0
+        self.vector = a
+        self.dim = dim
+
+    def count_gradient(self, vector: np.ndarray) -> np.ndarray:
+        self.amount_applying_grad += 1
+        return self.vector * vector
+
+    def mod(self, vector: np.ndarray) -> float:
+        return (vector * vector) ** 0.5
+
+    def reset_applying(self) -> None:
+        self.amount_applying = 0
+        self.amount_applying_grad = 0
+
+    def apply(self, vector: np.ndarray) -> float:
+        self.inc_amount_applying()
+        ans = np.sum(vector * vector * self.vector) / 2
+        return ans
+
+    def __repr__(self):
+        return str(self.vector)
