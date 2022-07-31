@@ -1,7 +1,7 @@
 from typing import Tuple, Any
 
-from optimizer import Optimizer
-from functions import Function
+from lab1.gd.optimizer import Optimizer
+from lab1.gd.functions import Function
 
 
 class DichotomyOptimizer(Optimizer):

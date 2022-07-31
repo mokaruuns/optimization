@@ -1,7 +1,7 @@
 import numpy as np
 
-from functions import BiFunction
-from base_gradient import BaseGradient
+from lab1.gd.functions import BiFunction
+from lab1.gd.base_gradient import BaseGradient
 
 # Function(lambda x, y: 16 * x ** 2 + 20 * y ** 2 - 4 * x - 8 * y + 1)
 optimizer_params = {"epsilon": 1e-6, "start": np.array([0, 0]), "lr": 1}

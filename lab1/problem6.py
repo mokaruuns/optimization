@@ -1,17 +1,14 @@
-from multiprocessing import Process, Queue
-
 import numpy as np
 import pandas as pd
 # %matplotlib inline
 import matplotlib.pyplot as plt
 import statistics
 
-from functions import BiFunction
-from functions import DiagFunction
-from base_gradient import BaseGradient
-from dichotomy_optimizer import DichotomyOptimizer
-from golden_ratio_optimizer import GoldenRatioOptimizer
-from fibonacci_optimizer import FibonacciOptimizer
+from lab1.gd.functions import DiagFunction
+from lab1.gd.base_gradient import BaseGradient
+from lab1.gd.dichotomy_optimizer import DichotomyOptimizer
+from lab1.gd.golden_ratio_optimizer import GoldenRatioOptimizer
+from lab1.gd.fibonacci_optimizer import FibonacciOptimizer
 
 
 def generate_diag(n, k):
@@ -45,7 +42,7 @@ def draw_plots(d):
         leg = plt.legend(loc='upper left', shadow=True)
         leg.get_frame().set_alpha(0.5)
         plt.title(titles[i])
-        plt.savefig('problem6_' + d['index'].iloc[i] + '.png')
+        plt.savefig('problem6_median_' + d['index'].iloc[i] + '.png')
         plt.show()
 
 
@@ -58,7 +55,7 @@ def get_mean(amount, method, n, k, optimizer=None):
             x.append(method(fn)[2])
         else:
             x.append(method(fn, optimizer)[2])
-    return statistics.mean(x)
+    return statistics.median(x)
 
 
 def run_test(n, k):
@@ -72,16 +69,16 @@ def run_test(n, k):
         optimizer_params = {"epsilon": 1e-5, "start": np.ones(i), "lr": 1}
         optimizer = BaseGradient(**optimizer_params)
         for j in k:
-            di['gradient_descent'][j] = get_mean(5, optimizer.gradient_descent, i, j)
-            di['DichotomyOptimizer'][j] = get_mean(5, optimizer.steepest_descent, i, j, DichotomyOptimizer)
-            di['GoldenRatioOptimizer'][j] = get_mean(5, optimizer.steepest_descent, i, j, GoldenRatioOptimizer)
-            di['FibonacciOptimizer'][j] = get_mean(5, optimizer.steepest_descent, i, j, FibonacciOptimizer)
+            di['gradient_descent'][j] = get_mean(7, optimizer.gradient_descent, i, j)
+            di['DichotomyOptimizer'][j] = get_mean(7, optimizer.steepest_descent, i, j, DichotomyOptimizer)
+            di['GoldenRatioOptimizer'][j] = get_mean(7, optimizer.steepest_descent, i, j, GoldenRatioOptimizer)
+            di['FibonacciOptimizer'][j] = get_mean(7, optimizer.steepest_descent, i, j, FibonacciOptimizer)
             di_n[i] = di
         print(i, "is done")
     return di_n
 
 
-x = run_test(n=[10, 100, 1000, 10000], k=range(5, 2006, 100))
+x = run_test(n=[10, 100, 1000, 10000], k=range(5, 2506, 50))
 df_x = pd.DataFrame(x).reset_index()
 
 draw_plots(df_x)

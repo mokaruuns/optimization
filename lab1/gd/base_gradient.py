@@ -1,26 +1,20 @@
 from copy import copy
-from typing import Tuple, Any
 
 import numpy as np
 
-from lines import draw
-from functions import BiFunction, Function
-from optimizer import Optimizer
-from dichotomy_optimizer import DichotomyOptimizer
-from golden_ratio_optimizer import GoldenRatioOptimizer
-from fibonacci_optimizer import FibonacciOptimizer
-from typing import Union
+from lab1.gd.lines import draw
+from lab1.gd.functions import BiFunction, Function
+from lab1.gd.optimizer import Optimizer
+from lab1.gd.dichotomy_optimizer import DichotomyOptimizer
+from lab1.gd.golden_ratio_optimizer import GoldenRatioOptimizer
+from lab1.gd.fibonacci_optimizer import FibonacciOptimizer
 
 
-def get_new_alpha(func: BiFunction, start_point: np.ndarray, grad: np.ndarray, lr: float,
+def get_new_alpha(func: BiFunction, start_point: np.ndarray, grad: np.ndarray,
                   my_optimizer) -> float:
     x = Function(lambda l: func.apply(start_point + grad * (-l)))
     optimizer = my_optimizer(1e-5, 0, 1)
     return optimizer.optimize(x)[0]
-
-
-def mod(vector: np.ndarray):
-    return np.sqrt(vector.dot(vector))
 
 
 def draw_lines(points, func, optimizer):
@@ -39,25 +33,18 @@ class BaseGradient:
         stop = False
         start_point = copy(self.start)
         lr = self.lr
-        xyz = []
         while not stop:
             grad = func.count_gradient(start_point)
-            ln = mod(grad)
-            # print(grad, ln)
-            grad = grad / ln
             if stp:
-                lr = get_new_alpha(func, start_point, grad, lr, my_optimizer)
+                lr = get_new_alpha(func, start_point, grad, my_optimizer)
             next_point = start_point + grad * (-lr)
             fx_current = func.apply(start_point)
             fx_next = func.apply(next_point)
-            # print([*start_point, fx_current])
-            xyz.append([*start_point, fx_current])
             if abs(fx_next - fx_current) < self.epsilon:
                 stop = True
             if fx_current < fx_next:
                 lr /= 2
             start_point = next_point
-        # draw_lines(xyz, func, my_optimizer)
         return start_point
 
     def steepest_descent(self, func: BiFunction, my_optimizer):
