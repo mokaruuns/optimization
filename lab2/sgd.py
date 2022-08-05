@@ -1,5 +1,3 @@
-import random
-
 import numpy as np
 import pandas as pd
 from sklearn.metrics import mean_squared_error
@@ -7,21 +5,16 @@ from sklearn import preprocessing
 from sklearn.preprocessing import StandardScaler
 
 
-def gradient(x, y, params):
-    w, b = params
+def gradient(x, y, grad):
+    w, b = grad
     diff = y - x * w - b
     dw = - 2 * (x * diff).mean()
     db = - 2 * diff.mean()
     return np.array([dw, db])
 
 
-def loss_(w, x, y):
-    M = np.dot(w, x) * y
-    return 2 / (1 + np.exp(M))
-
-
-def predict(x, params):
-    return x * params[0] + params[1]
+def predict(x, grad):
+    return x * grad[0] + grad[1]
 
 
 def sgd_regressor(X, learning_rate=0.2, n_epochs=1000, k=20, epsilon=1e-5):
@@ -39,17 +32,18 @@ def sgd_regressor(X, learning_rate=0.2, n_epochs=1000, k=20, epsilon=1e-5):
 
         y_predicted = predict(x_tr, params)
         loss = mean_squared_error(y_predicted, y_tr)
-
+        points.append((*params, loss))
         if loss < epsilon:
-            print("Epoch: %d, Loss: %.6f, w: %.3f b: %.3f" % (epoch, loss, *params))
-            return params
+            print("Epoch: %d, Loss: %.6f, w: %.3f b: %.3f" % (epoch, loss, params[0], params[1]))
+            return params, points
 
-    return params
+    return params, points
 
 
 def sgd_regressor_momentum(X, learning_rate=0.2, n_epochs=1000, k=20, epsilon=1e-5, momentum=0.3):
     params = np.random.randn(2)  # Randomly initializing weights
     change = 0.0
+    points = []
     for epoch in range(n_epochs):
         temp = X.sample(k)
 
@@ -62,17 +56,19 @@ def sgd_regressor_momentum(X, learning_rate=0.2, n_epochs=1000, k=20, epsilon=1e
         change = new_change
         y_predicted = predict(x_tr, params)
         loss = mean_squared_error(y_predicted, y_tr)
+        points.append((*params, loss))
 
         if loss < epsilon:
-            print("Epoch: %d, Loss: %.6f, w: %.3f b: %.3f" % (epoch, loss, *params))
-            return params
+            print("Epoch: %d, Loss: %.6f, w: %.3f b: %.3f" % (epoch, loss, params[0], params[1]))
+            return params, points
 
-    return params
+    return params, points
 
 
 def sgd_regressor_nesterov(X, learning_rate=0.2, n_epochs=1000, k=20, epsilon=1e-5, momentum=0.3):
     params = np.random.randn(2)  # Randomly initializing weights
     change = 0.0
+    points = []
     for epoch in range(n_epochs):
         temp = X.sample(k)
 
@@ -85,95 +81,103 @@ def sgd_regressor_nesterov(X, learning_rate=0.2, n_epochs=1000, k=20, epsilon=1e
         change = new_change
         y_predicted = predict(x_tr, params)
         loss = mean_squared_error(y_predicted, y_tr)
-
+        points.append((*params, loss))
         if loss < epsilon:
-            print("Epoch: %d, Loss: %.6f, w: %.3f b: %.3f" % (epoch, loss, *params))
-            return params
+            print("Epoch: %d, Loss: %.6f, w: %.3f b: %.3f" % (epoch, loss, params[0], params[1]))
+            return params, points
 
-    return params
+    return params, points
 
 
-def sgd_regressor_adagrad(X, learning_rate=0.2, n_epochs=1000, k=20, epsilon=1e-5, momentum=0.3):
+def sgd_regressor_adagrad(X, learning_rate=0.2, n_epochs=1000, k=20, epsilon=1e-5):
     params = np.random.randn(2)  # Randomly initializing weights
     eps = 1e-8
-    G = np.zeros(2)
+    sq_grad = np.zeros(2)
+    points = []
     for epoch in range(n_epochs):
         temp = X.sample(k)
 
         x_tr = temp['x'].values
         y_tr = temp['y'].values
 
-        new_grad = gradient(x_tr, y_tr, params)
-        # G = np.sum(new_grad ** 2)
-        G += new_grad ** 2
-        new_change = - learning_rate * new_grad / np.sqrt(G + eps)
+        grad = gradient(x_tr, y_tr, params)
+
+        sq_grad += grad ** 2
+
+        new_change = - learning_rate * grad / np.sqrt(sq_grad + eps)
         params += new_change
-        # change = new_change
+
         y_predicted = predict(x_tr, params)
         loss = mean_squared_error(y_predicted, y_tr)
 
+        points.append((*params, loss))
         if loss < epsilon:
-            print("Epoch: %d, Loss: %.6f, w: %.3f b: %.3f" % (epoch, loss, *params))
-            return params
+            print("Epoch: %d, Loss: %.6f, w: %.3f b: %.3f" % (epoch, loss, params[0], params[1]))
+            return params, points
 
-    return params
+    return params, points
 
 
-def sgd_regressor_rmsprop(X, learning_rate=0.2, n_epochs=1000, k=20, epsilon=1e-5, momentum=0.3, forget=0.2):
+def sgd_regressor_rmsprop(X, learning_rate=0.2, n_epochs=1000, k=20, epsilon=1e-5, forget=0.95):
     params = np.random.randn(2)  # Randomly initializing weights
     eps = 1e-8
     sq_grad_avg = np.zeros(2)
+    points = []
     for epoch in range(n_epochs):
         temp = X.sample(k)
 
         x_tr = temp['x'].values
         y_tr = temp['y'].values
 
-        new_grad = gradient(x_tr, y_tr, params)
+        grad = gradient(x_tr, y_tr, params)
 
-        sq_grad_avg = sq_grad_avg * forget + (new_grad ** 2) * (1 - forget)
-        new_change = - learning_rate * new_grad / np.sqrt(sq_grad_avg + eps)
+        sq_grad_avg = sq_grad_avg * forget + (grad ** 2) * (1 - forget)
+
+        new_change = - learning_rate * grad / np.sqrt(sq_grad_avg + eps)
         params += new_change
+
         y_predicted = predict(x_tr, params)
         loss = mean_squared_error(y_predicted, y_tr)
-
+        points.append((*params, loss))
         if loss < epsilon:
-            print("Epoch: %d, Loss: %.6f, w: %.3f b: %.3f" % (epoch, loss, *params))
-            return params
+            print("Epoch: %d, Loss: %.6f, w: %.3f b: %.3f" % (epoch, loss, params[0], params[1]))
+            return params, points
 
-    return params
+    return params, points
 
 
 def sgd_regressor_adam(X, learning_rate=0.2, n_epochs=1000, k=20, epsilon=1e-5,
-                       momentum=0.3, forget_m=0.99, forget_g=0.99):
+                       forget_g=0.9, forget_sq_g=0.99):
     params = np.random.randn(2)  # Randomly initializing weights
     eps = 1e-8
     sq_grad_avg = np.zeros(2)
-    sq_m_avg = np.zeros(2)
+    grad_avg = np.zeros(2)
+    points = []
     for epoch in range(n_epochs):
         temp = X.sample(k)
 
         x_tr = temp['x'].values
         y_tr = temp['y'].values
 
-        new_grad = gradient(x_tr, y_tr, params)
+        grad = gradient(x_tr, y_tr, params)
 
-        sq_grad_avg = sq_grad_avg * forget_g + (new_grad ** 2) * (1 - forget_g)
-        sq_m_avg = sq_m_avg * forget_m + (new_grad) * (1 - forget_m)
+        sq_grad_avg = sq_grad_avg * forget_sq_g + (grad ** 2) * (1 - forget_sq_g)
+        grad_avg = grad_avg * forget_g + grad * (1 - forget_g)
 
-        m_new = sq_m_avg / (1 - forget_m)
-        grad_new = sq_grad_avg / (1 - forget_g)
+        grad_ = grad_avg / (1 - forget_g)
+        sq_grad = sq_grad_avg / (1 - forget_sq_g)
 
-        new_change = - learning_rate * m_new / np.sqrt(grad_new + eps)
+        new_change = - learning_rate * grad_ / np.sqrt(sq_grad + eps)
         params += new_change
         y_predicted = predict(x_tr, params)
         loss = mean_squared_error(y_predicted, y_tr)
 
+        points.append((*params, loss))
         if loss < epsilon:
-            print("Epoch: %d, Loss: %.6f, w: %.3f b: %.3f" % (epoch, loss, *params))
-            return params
+            print("Epoch: %d, Loss: %.6f, w: %.3f b: %.3f" % (epoch, loss, params[0], params[1]))
+            return params, points
 
-    return params
+    return params, points
 
 
 def generate_points(n, a, b):
@@ -184,24 +188,3 @@ def generate_points(n, a, b):
     xy = pd.DataFrame(xy.T, columns=['x', 'y'])
 
     return xy
-
-
-xy = generate_points(n=100, a=-20, b=10)
-#
-# params = sgd_regressor(xy, learning_rate=0.4, n_epochs=10000, k=20, epsilon=1e-7)
-# print(params)
-
-# params = sgd_regressor_momentum(xy, learning_rate=0.4, n_epochs=10000, k=20, epsilon=1e-7, momentum=0.95)
-# print(params)
-
-params = sgd_regressor_nesterov(xy, learning_rate=0.4, n_epochs=10000, k=10, epsilon=1e-7, momentum=0.95)
-print(params)
-
-params = sgd_regressor_adagrad(xy, learning_rate=1, n_epochs=10000, k=10, epsilon=1e-7, momentum=0.95)
-print(params)
-
-params = sgd_regressor_rmsprop(xy, learning_rate=0.01, n_epochs=10000, k=10, epsilon=1e-7, forget=0.99)
-print(params)
-
-params = sgd_regressor_adam(xy, learning_rate=1, n_epochs=10000, k=10, epsilon=1e-7, forget_m=0.9, forget_g=0.99)
-print(params)
