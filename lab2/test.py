@@ -33,11 +33,26 @@ def get_data():
     lr = 0.4
     x_tr = xy['x'].values
     y_tr = xy['y'].values
+
+    params, points = sgd_regressor(xy, learning_rate=lr, n_epochs=10000, k=mini_batch)
+    draw(x_tr, y_tr, points)
+
     params, points = sgd_regressor_momentum(xy, learning_rate=lr, n_epochs=10000, k=mini_batch, momentum=0.95)
-    return x_tr, y_tr, points
+    draw(x_tr, y_tr, points)
+
+    params, points = sgd_regressor_nesterov(xy, learning_rate=lr, n_epochs=10000, k=mini_batch, momentum=0.95)
+    draw(x_tr, y_tr, points)
+
+    params, points = sgd_regressor_adagrad(xy, learning_rate=1, n_epochs=10000, k=mini_batch)
+    draw(x_tr, y_tr, points)
+
+    params, points = sgd_regressor_rmsprop(xy, learning_rate=1, n_epochs=10000, k=mini_batch, forget=0.9)
+    draw(x_tr, y_tr, points)
+
+    params, points = sgd_regressor_adam(xy, learning_rate=lr, n_epochs=10000, k=mini_batch)
+    draw(x_tr, y_tr, points)
 
 
 # test1()
 
-data = get_data()
-draw(data)
+get_data()

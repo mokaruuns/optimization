@@ -6,7 +6,7 @@ from sklearn.metrics import mean_squared_error
 
 def makeData():
     # Строим сетку в интервале от -10 до 10, имеющую 100 отсчетов по обоим координатам
-    x = np.linspace(-5, 5, 100)
+    x = np.linspace(-2, 5, 100)
     y = np.linspace(-5, 5, 100)
 
     # Создаем двумерную матрицу-сетку
@@ -38,18 +38,15 @@ def get_y(x, w, b, y_expected):
     return res
 
 
-def draw(points):
-    x, y_expected, p = points
+def draw(x, y_expected, p):
     w_p, b_p, l_p = np.array(p).T
-    w = np.linspace(-6, 1, 500)
-    b = np.linspace(2.25, 3.25, 500)
+    w = np.linspace(-10, 10, 100)
+    b = np.linspace(-5, 7, 100)
     wgrid, bgrid = np.meshgrid(w, b)  # точки для построения линий
 
     # zgrid = 16 * wgrid ** 2 + 20 * bgrid ** 2 - 4 * wgrid - 8 * bgrid + 5  # нужно придумать функцию
 
     z_loss = get_y(x, wgrid, bgrid, y_expected)
-    print(z_loss)
-
     # print(y_pred)
     """
         Нужны x
@@ -59,9 +56,7 @@ def draw(points):
         
     """
     # zgrid = 64 * xgrid ** 2 + 64 * ygrid ** 2 + 126 * xgrid * ygrid - 10 * xgrid + 30 * ygrid + 13
-    # print(z)
-    # print(sorted(z))
-    plt.contour(wgrid, bgrid, z_loss, levels=[0, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 0.5, 1])
+    plt.contour(wgrid, bgrid, z_loss, levels=[0, 1e-5, 1e-4, 1e-3, 1e-2, 1e-1, 0.5, 1, 1.5, 2, 5])
     pylab.plt.plot(w_p, b_p, color='r')
     # ax.clabel(colors='black')
     # pylab.plt.savefig(name+ '.png')
